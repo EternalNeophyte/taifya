@@ -25,15 +25,6 @@ public class Grammar implements Formatting {
         nonterminals = new LinkedList<>();
     }
 
-    private List<String> chainsSelectedBy(Predicate<Chain> predicate) {
-        return rules.stream()
-                .flatMap(Rule::mergedChains)
-                .filter(predicate)
-                .map(Chain::getLiteral)
-                .distinct()
-                .collect(Collectors.toUnmodifiableList());
-    }
-
     public static Grammar describe() {
         return new Grammar();
     }
@@ -69,6 +60,15 @@ public class Grammar implements Formatting {
         else {
             type = CONTEXT_DEPENDANT;
         }
+    }
+
+    private List<String> chainsSelectedBy(Predicate<Chain> predicate) {
+        return rules.stream()
+                .flatMap(Rule::mergedChains)
+                .filter(predicate)
+                .map(Chain::getLiteral)
+                .distinct()
+                .collect(Collectors.toUnmodifiableList());
     }
 
     public int numberOfRules() {
