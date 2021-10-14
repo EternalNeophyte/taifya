@@ -32,7 +32,7 @@ public class Labs {
         scanner.close();
     }
 
-    public static void lab1() {
+    public static void lab2() {
         final String stopLine = "@";
         Grammar grammar = Grammar.describe();
         printLegendForLab1(stopLine);
