@@ -4,11 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-/**
- * Created on 19.10.2021 by
- *
- * @author alexandrov
- */
 public class ChainSequence {
 
     private List<Chain> chains;
@@ -38,12 +33,12 @@ public class ChainSequence {
         return chains.size() == size;
     }
 
-    public boolean consistsAnyOf(ChainType[]... types) {
+    public boolean containsInOrder(ChainType... types) {
         if(types.length != chains.size()) {
             return false;
         }
         for(int i = 0; i < types.length; i++) {
-            if(chains.get(i).notAnyOf(types[i])) {
+            if(types[i].nothingAs(chains.get(i).getType())) {
                 return false;
             }
         }

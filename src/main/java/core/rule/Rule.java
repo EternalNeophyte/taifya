@@ -2,10 +2,11 @@ package core.rule;
 
 import core.chain.Chain;
 import core.chain.ChainSequence;
-import core.chain.ChainType;
 import core.format.Formatting;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,6 +45,10 @@ public class Rule implements Formatting {
                     });
     }
 
+    public ChainSequence right(int index) {
+        return right.get(index);
+    }
+
     public Stream<Chain> rightChains() {
         return right.stream()
                     .flatMap(ChainSequence::chains);
@@ -57,32 +62,21 @@ public class Rule implements Formatting {
         return mergedChains().anyMatch(c -> c.is(EMPTY));
     }
 
-    public boolean leftSideHasOneLiteral() {
-        return left.hasSize(1) && left.at(0).isAnyOf(AXIOM, NON_TERMINAL);
-    }
-
-    private boolean isAlignedBasically(ChainType[] typesOfFirst, ChainType[] typesOfSecond) {
-        ChainSequence rightOne = right.get(0);
-        ChainSequence rightTwo = right.get(1);
-        return left.hasSize(1)
-                && left.at(0).isAnyOf(AXIOM, NON_TERMINAL)
-                && right.size() == 2
-                && rightOne.hasSize(2)
-                && rightOne.at(0).isAnyOf(typesOfFirst)
-                && rightOne.at(1).isAnyOf(typesOfSecond)
-                && rightTwo.hasSize(1)
-                && rightTwo.at(0).is(TERMINAL);
+    public boolean leftSideHasOneChain() {
+        return left.containsInOrder(AXIOM.or(NON_TERMINAL));
     }
 
     public boolean isAlignedLeft() {
+        return leftSideHasOneChain()
+                && right(0).containsInOrder(AXIOM.or(NON_TERMINAL), TERMINAL)
+                && right(1).containsInOrder(TERMINAL);
 
-        return isAlignedBasically(ChainType.of(AXIOM, NON_TERMINAL),
-                                  ChainType.of(TERMINAL));
     }
 
     public boolean isAlignedRight() {
-        return isAlignedBasically(ChainType.of(TERMINAL),
-                                  ChainType.of(AXIOM, NON_TERMINAL));
+        return leftSideHasOneChain()
+                && right(0).containsInOrder(TERMINAL)
+                && right(1).containsInOrder(AXIOM.or(NON_TERMINAL), TERMINAL);
     }
 
     public boolean isAligned() {

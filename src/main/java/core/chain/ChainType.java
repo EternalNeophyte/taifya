@@ -5,7 +5,9 @@ import core.format.Regulars;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public enum ChainType implements Regulars {
 
@@ -17,12 +19,13 @@ public enum ChainType implements Regulars {
 
     private final String regex;
     private final String definition;
-    private List<ChainType> alternatives;
+    private final List<ChainType> variants;
 
     ChainType(String regex, String definition) {
         this.regex = regex;
         this.definition = definition;
-        this.alternatives = new LinkedList<>();
+        this.variants = new LinkedList<>();
+        variants.add(this);
     }
 
     public static ChainType from(String input) {
@@ -39,13 +42,25 @@ public enum ChainType implements Regulars {
     }
 
     public ChainType or(ChainType other) {
-        alternatives.add(other);
+        variants.add(other);
         return this;
     }
 
-    public boolean match(ChainType... types) {
-// ToDo
-        return false;
+    public Stream<ChainType> variants() {
+        return variants.stream();
+    }
+
+    public boolean anyAs(ChainType other) {
+        return variants().anyMatch(t -> t.sameAs(other));
+    }
+
+    public boolean nothingAs(ChainType other) {
+        return variants().noneMatch(t -> t.sameAs(other));
+    }
+
+    public boolean sameAs(ChainType other) {
+        return Objects.equals(this.regex, other.regex)
+                && Objects.equals(this.definition, other.definition);
     }
 
     @Override

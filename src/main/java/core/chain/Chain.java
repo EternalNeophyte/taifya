@@ -24,7 +24,7 @@ public class Chain {
         return this.type.equals(type);
     }
 
-    public boolean not(ChainType type) {
+    public boolean isNot(ChainType type) {
         return !is(type);
     }
 
@@ -33,17 +33,16 @@ public class Chain {
                      .anyMatch(this::is);
     }
 
-    public boolean notAnyOf(ChainType... types) {
+    public boolean isNotAnyOf(ChainType... types) {
         return !isAnyOf(types);
+    }
+
+    public ChainType getType() {
+        return type;
     }
 
     public String getLiteral() {
         return literal;
-    }
-
-    @Override
-    public String toString() {
-        return type.toString() + " " + literal;
     }
 
     @Override
@@ -58,5 +57,10 @@ public class Chain {
             Chain ch = (Chain) o;
             return this.literal.equals(ch.literal);
         }
+    }
+
+    @Override
+    public String toString() {
+        return type.toString() + " " + literal;
     }
 }

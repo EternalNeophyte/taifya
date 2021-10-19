@@ -54,7 +54,7 @@ public class Grammar implements Formatting {
         else if(all(Rule::isAligned)) {
             type = REGULAR;
         }
-        else if(all(Rule::leftSideHasOneLiteral)) {
+        else if(all(Rule::leftSideHasOneChain)) {
             type = CONTEXT_FREE;
         }
         else {
