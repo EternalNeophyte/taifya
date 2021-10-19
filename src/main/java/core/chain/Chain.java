@@ -24,9 +24,17 @@ public class Chain {
         return this.type.equals(type);
     }
 
+    public boolean not(ChainType type) {
+        return !is(type);
+    }
+
     public boolean isAnyOf(ChainType... types) {
         return Arrays.stream(types)
                      .anyMatch(this::is);
+    }
+
+    public boolean notAnyOf(ChainType... types) {
+        return !isAnyOf(types);
     }
 
     public String getLiteral() {

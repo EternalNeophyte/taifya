@@ -1,6 +1,7 @@
 package core.rule;
 
 import core.chain.Chain;
+import core.chain.ChainSequence;
 import core.chain.ChainType;
 import core.format.Formatting;
 
@@ -12,11 +13,11 @@ import static core.chain.ChainType.*;
 
 public class Rule implements Formatting {
 
-    private List<Chain> left;
-    private List<List<Chain>> right;
+    private ChainSequence left;
+    private List<ChainSequence> right;
 
     private Rule() {
-        left = new LinkedList<>();
+        left = ChainSequence.create();
         right = new LinkedList<>();
     }
 
@@ -27,27 +28,29 @@ public class Rule implements Formatting {
     }
 
     private void initChainsFrom(String input) {
-        List<List<String>> inputHolder =
-                Arrays.stream(input.trim().split(RULE_SPLITTER))
+        List<List<String>> inputHolder = Arrays.stream(input.trim().split(RULE_SPLITTER))
                     .map(part -> Chain.is(part, EMPTY)
                                     ? List.of(EPSILON)
                                     : Arrays.asList(part.split("")))
                     .collect(Collectors.toUnmodifiableList());
         inputHolder.get(0)
-                    .forEach(s -> left.add(Chain.from(s)));
+                    .forEach(s -> left.chain(s));
         inputHolder.stream()
                     .skip(1)
                     .forEach(list -> {
-                                    List<Chain> chains = new LinkedList<>();
-                                    list.forEach(s -> chains.add(Chain.from(s)));
-                                    right.add(chains);
+                                    ChainSequence sequence = ChainSequence.create();
+                                    list.forEach(sequence::chain);
+                                    right.add(sequence);
                     });
     }
 
+    public Stream<Chain> rightChains() {
+        return right.stream()
+                    .flatMap(ChainSequence::chains);
+    }
+
     public Stream<Chain> mergedChains() {
-        List<Chain> merged = new LinkedList<>(left);
-        right.forEach(merged::addAll);
-        return merged.stream();
+        return Stream.concat(left.chains(), rightChains());
     }
 
     public boolean hasEmptyChain() {
@@ -55,23 +58,24 @@ public class Rule implements Formatting {
     }
 
     public boolean leftSideHasOneLiteral() {
-        return left.size() == 1 && left.get(0).isAnyOf(AXIOM, NON_TERMINAL);
+        return left.hasSize(1) && left.at(0).isAnyOf(AXIOM, NON_TERMINAL);
     }
 
     private boolean isAlignedBasically(ChainType[] typesOfFirst, ChainType[] typesOfSecond) {
-        List<Chain> rightOne = right.get(0);
-        List<Chain> rightTwo = right.get(1);
-        return left.size() == 1
+        ChainSequence rightOne = right.get(0);
+        ChainSequence rightTwo = right.get(1);
+        return left.hasSize(1)
+                && left.at(0).isAnyOf(AXIOM, NON_TERMINAL)
                 && right.size() == 2
-                && left.get(0).isAnyOf(AXIOM, NON_TERMINAL)
-                && rightOne.size() == 2
-                && rightOne.get(0).isAnyOf(typesOfFirst)
-                && rightOne.get(1).isAnyOf(typesOfSecond)
-                && rightTwo.size() == 1
-                && rightTwo.get(0).is(TERMINAL);
+                && rightOne.hasSize(2)
+                && rightOne.at(0).isAnyOf(typesOfFirst)
+                && rightOne.at(1).isAnyOf(typesOfSecond)
+                && rightTwo.hasSize(1)
+                && rightTwo.at(0).is(TERMINAL);
     }
 
     public boolean isAlignedLeft() {
+
         return isAlignedBasically(ChainType.of(AXIOM, NON_TERMINAL),
                                   ChainType.of(TERMINAL));
     }
@@ -89,11 +93,11 @@ public class Rule implements Formatting {
     public String toString() {
         StringBuilder sb = new StringBuilder("\nПравило");
         sb.append("\n").append("Левая часть = [");
-        left.forEach(c -> perComma(sb, c.toString()));
+        left.chains().forEach(c -> perComma(sb, c.toString()));
         replaceLast(sb, COMMA, SQUARE_BRACKET);
         sb.append("\n").append("Правая часть = [");
-        right.forEach(list -> {
-                    list.forEach(c -> perComma(sb, c.toString()));
+        right.forEach(sequence -> {
+                    sequence.chains().forEach(c -> perComma(sb, c.toString()));
                     replaceLast(sb, COMMA, DELIMITER);
                 });
         replaceLast(sb, DELIMITER, SQUARE_BRACKET);
