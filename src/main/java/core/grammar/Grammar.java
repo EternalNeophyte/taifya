@@ -101,7 +101,9 @@ public class Grammar implements Formatting {
         sb.append(", {");
         nonterminals.forEach(literal -> perComma(sb, literal));
         replaceLast(sb, COMMA, FLOATING_BRACKET);
-        sb.append(", P, S } имеет тип:\n").append(type.toString()).append("\n");
+        sb.append(", P, S } c правилами P = { ");
+        rules.forEach(r -> sb.append("\t").append(r));
+        sb.append("\n}\nимеет тип:\n").append(type.toString()).append("\n");
         return sb.toString();
     }
 }

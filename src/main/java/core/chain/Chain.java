@@ -1,5 +1,7 @@
 package core.chain;
 
+import core.format.Regulars;
+
 import java.util.Arrays;
 
 public class Chain {
@@ -10,6 +12,10 @@ public class Chain {
     private Chain(String input) {
         literal = input;
         type = ChainType.from(input);
+    }
+
+    public static Chain empty() {
+        return new Chain(Regulars.EPSILON);
     }
 
     public static Chain from(String input) {

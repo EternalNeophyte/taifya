@@ -19,22 +19,20 @@ public enum ChainType implements Regulars {
 
     private final String regex;
     private final String definition;
-    private final List<ChainType> variants;
+    private List<ChainType> variants;
 
     ChainType(String regex, String definition) {
         this.regex = regex;
         this.definition = definition;
-        this.variants = new LinkedList<>();
-        variants.add(this);
     }
 
     public static ChainType from(String input) {
         return Arrays.stream(values())
-                .filter(t -> Pattern.compile(t.regex)
-                                    .matcher(input)
-                                    .find())
-                .findFirst()
-                .orElse(UNKNOWN);
+                     .filter(t -> Pattern.compile(t.regex)
+                                         .matcher(input)
+                                         .find())
+                     .findFirst()
+                     .orElse(UNKNOWN);
     }
 
     public static ChainType[] of(ChainType... types) {
@@ -42,12 +40,17 @@ public enum ChainType implements Regulars {
     }
 
     public ChainType or(ChainType other) {
+        if(Objects.isNull(variants)) {
+            variants = new LinkedList<>();
+            variants.add(this);
+        }
         variants.add(other);
         return this;
     }
 
     public Stream<ChainType> variants() {
-        return variants.stream();
+        return Objects.requireNonNullElse(variants, List.of(this))
+                      .stream();
     }
 
     public boolean anyAs(ChainType other) {

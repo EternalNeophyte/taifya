@@ -1,10 +1,12 @@
 package core.chain;
 
+import util.ListSafeAccessor;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ChainSequence {
+public class ChainSequence implements ListSafeAccessor {
 
     private List<Chain> chains;
 
@@ -12,7 +14,7 @@ public class ChainSequence {
         chains = new ArrayList<>();
     }
 
-    public static ChainSequence create() {
+    public static ChainSequence empty() {
         return new ChainSequence();
     }
 
@@ -26,7 +28,7 @@ public class ChainSequence {
     }
 
     public Chain at(int index) {
-        return chains.get(index);
+        return getAtIndexOrElse(chains, index, Chain.empty());
     }
 
     public boolean hasSize(int size) {

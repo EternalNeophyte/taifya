@@ -3,6 +3,7 @@ package core.rule;
 import core.chain.Chain;
 import core.chain.ChainSequence;
 import core.format.Formatting;
+import util.ListSafeAccessor;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -12,13 +13,13 @@ import java.util.stream.Stream;
 
 import static core.chain.ChainType.*;
 
-public class Rule implements Formatting {
+public class Rule implements Formatting, ListSafeAccessor {
 
     private ChainSequence left;
     private List<ChainSequence> right;
 
     private Rule() {
-        left = ChainSequence.create();
+        left = ChainSequence.empty();
         right = new LinkedList<>();
     }
 
@@ -39,14 +40,14 @@ public class Rule implements Formatting {
         inputHolder.stream()
                     .skip(1)
                     .forEach(list -> {
-                                    ChainSequence sequence = ChainSequence.create();
+                                    ChainSequence sequence = ChainSequence.empty();
                                     list.forEach(sequence::chain);
                                     right.add(sequence);
                     });
     }
 
     public ChainSequence right(int index) {
-        return right.get(index);
+        return getAtIndexOrElse(right, index, ChainSequence.empty());
     }
 
     public Stream<Chain> rightChains() {
@@ -85,16 +86,16 @@ public class Rule implements Formatting {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("\nПравило");
-        sb.append("\n").append("Левая часть = [");
+        StringBuilder sb = new StringBuilder("\n\tПравило {")
+                                .append("\n\t\t").append("Левая часть = [");
         left.chains().forEach(c -> perComma(sb, c.toString()));
         replaceLast(sb, COMMA, SQUARE_BRACKET);
-        sb.append("\n").append("Правая часть = [");
+        sb.append("\n\t\t").append("Правая часть = [");
         right.forEach(sequence -> {
                     sequence.chains().forEach(c -> perComma(sb, c.toString()));
                     replaceLast(sb, COMMA, DELIMITER);
                 });
         replaceLast(sb, DELIMITER, SQUARE_BRACKET);
-        return sb.toString();
+        return sb.append("\n\t}").toString();
     }
 }
