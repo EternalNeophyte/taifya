@@ -64,11 +64,16 @@ public class Rule implements Formatting, ListSafeAccessor {
     }
 
     public boolean leftSideHasOneChain() {
-        return left.containsInOrder(AXIOM.or(NON_TERMINAL));
+        return left.hasSize(1) && left.containsInOrder(AXIOM.or(NON_TERMINAL));
+    }
+
+    public boolean rightSideHasSize(int size) {
+        return right.size() == size;
     }
 
     public boolean isAlignedLeft() {
         return leftSideHasOneChain()
+                && rightSideHasSize(2)
                 && right(0).containsInOrder(AXIOM.or(NON_TERMINAL), TERMINAL)
                 && right(1).containsInOrder(TERMINAL);
 
@@ -76,8 +81,9 @@ public class Rule implements Formatting, ListSafeAccessor {
 
     public boolean isAlignedRight() {
         return leftSideHasOneChain()
-                && right(0).containsInOrder(TERMINAL)
-                && right(1).containsInOrder(AXIOM.or(NON_TERMINAL), TERMINAL);
+                && rightSideHasSize(2)
+                && right(0).containsInOrder(TERMINAL, AXIOM.or(NON_TERMINAL))
+                && right(1).containsInOrder(TERMINAL);
     }
 
     public boolean isAligned() {
