@@ -3,11 +3,12 @@ package core.chain;
 import core.format.Regulars;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class Chain {
 
-    private ChainType type;
-    private String literal;
+    private final ChainType type;
+    private final String literal;
 
     private Chain(String input) {
         literal = input;
@@ -61,7 +62,8 @@ public class Chain {
         }
         else {
             Chain ch = (Chain) o;
-            return this.literal.equals(ch.literal);
+            return Objects.equals(this.literal, ch.literal)
+                    && this.type.sameAs(ch.type);
         }
     }
 

@@ -46,6 +46,14 @@ public class Rule implements Formatting, ListSafeAccessor {
                     });
     }
 
+    public ChainSequence left() {
+        return left;
+    }
+
+    public List<ChainSequence> right() {
+        return right;
+    }
+
     public ChainSequence right(int index) {
         return getAtIndexOrElse(right, index, ChainSequence.empty());
     }

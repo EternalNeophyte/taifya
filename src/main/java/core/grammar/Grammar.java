@@ -1,11 +1,13 @@
 package core.grammar;
 
 import core.chain.Chain;
+import core.chain.ChainSequence;
 import core.format.Formatting;
 import core.rule.Rule;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -36,8 +38,8 @@ public class Grammar implements Formatting {
 
     public Grammar formulate() {
         classify();
-        terminals = chainsSelectedBy(c -> c.is(TERMINAL));
-        nonterminals = chainsSelectedBy(c -> c.is(NON_TERMINAL));
+        terminals = literalsSelectedBy(c -> c.is(TERMINAL));
+        nonterminals = literalsSelectedBy(c -> c.is(NON_TERMINAL));
         return this;
     }
 
@@ -62,7 +64,7 @@ public class Grammar implements Formatting {
         }
     }
 
-    private List<String> chainsSelectedBy(Predicate<Chain> predicate) {
+    private List<String> literalsSelectedBy(Predicate<Chain> predicate) {
         return rules.stream()
                 .flatMap(Rule::mergedChains)
                 .filter(predicate)
@@ -87,6 +89,21 @@ public class Grammar implements Formatting {
     public boolean all(Predicate<Rule> predicate) {
         return rules.stream()
                     .allMatch(predicate);
+    }
+
+    public List<Rule> findRulesFrom(ChainSequence sequence) {
+        return rules.stream()
+                .filter(rule -> rule.left().equals(sequence))
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    public void lookupAndConsume(String input, Consumer<Rule> consumer) {
+        Rule initial = rules.stream()
+                .filter(rule -> rule.left().containsInOrder(AXIOM))
+                .findFirst()
+                .orElseThrow();
+        initial.right().forEach(cs -> findRulesFrom(cs));
+        //while
     }
 
     public void print() {
