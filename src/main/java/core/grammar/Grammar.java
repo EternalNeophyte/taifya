@@ -10,11 +10,15 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static core.chain.ChainType.*;
+import static core.chain.ChainType.NON_TERMINAL;
+import static core.chain.ChainType.TERMINAL;
 import static core.grammar.GrammarType.*;
 
 public class Grammar implements Formatting {
+
+    public final static ChainSequence INITIAL_SEQUENCE = ChainSequence.empty().chain("S");
 
     private GrammarType type;
     private List<Rule> rules;
@@ -81,29 +85,65 @@ public class Grammar implements Formatting {
         return rules.get(rules.size() - 1);
     }
 
+    public Stream<Rule> rules() {
+        return rules.stream();
+    }
+
     public boolean any(Predicate<Rule> predicate) {
-        return rules.stream()
-                    .anyMatch(predicate);
+        return rules().anyMatch(predicate);
     }
 
     public boolean all(Predicate<Rule> predicate) {
-        return rules.stream()
-                    .allMatch(predicate);
+        return rules().allMatch(predicate);
     }
 
-    public List<Rule> findRulesFrom(ChainSequence sequence) {
-        return rules.stream()
-                .filter(rule -> rule.left().equals(sequence))
+    private List<Rule> findRulesBy(Predicate<Rule> predicate) {
+        return rules()
+                .filter(predicate)
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    public void lookupAndConsume(String input, Consumer<Rule> consumer) {
-        Rule initial = rules.stream()
-                .filter(rule -> rule.left().containsInOrder(AXIOM))
+    private List<Rule> findRulesWithLeft(ChainSequence sequence) {
+        return findRulesBy(rule -> rule.left().startsSameAs(sequence));
+    }
+
+    private List<Rule> findRulesWithRight(ChainSequence sequence) {
+        return findRulesBy(rule -> rule.rightStream()
+                                       .anyMatch(cs -> cs.startsSameAs(sequence)));
+    }
+
+    public boolean lookupLeft(String input, ChainSequence sequence, Consumer<ChainSequence> consumer) {
+        if(sequence.equals(INITIAL_SEQUENCE)) {
+            consumer.accept(sequence);
+        }
+        for(Rule rule : findRulesWithLeft(sequence)) {
+            if(rule.isRecursive()) {
+                break;
+            }
+            for (ChainSequence cs : rule.right()) {
+                consumer.accept(cs);
+                if(cs.startsSameAs(input)) {
+                    return true;
+                }
+                lookupLeft(input, cs, consumer);
+            }
+        }
+        return false;
+    }
+
+    public void lookupRight(String input, List<Rule> rules, Consumer<ChainSequence> consumer) {
+        for(Rule rule : rules) {
+            rule.rightStream()
+                .filter(cs -> cs.startsSameAs(input))
                 .findFirst()
-                .orElseThrow();
-        initial.right().forEach(cs -> findRulesFrom(cs));
-        //while
+                .ifPresent(consumer);
+            ChainSequence left = rule.left();
+            consumer.accept(left);
+            if(left.equals(INITIAL_SEQUENCE)) {
+                break;
+            }
+            lookupRight(input, findRulesWithRight(left), consumer);
+        }
     }
 
     public void print() {

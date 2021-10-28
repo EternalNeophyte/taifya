@@ -1,9 +1,15 @@
 package util;
 
+import core.automat.LeftHandedAutomat;
+import core.automat.State;
 import core.grammar.Grammar;
+import core.rule.Rule;
 
+import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class Labs {
 
@@ -38,5 +44,15 @@ public class Labs {
         printLegendForLab1(stopLine);
         scanWith(stopLine, grammar::rule);
         grammar.formulate().print();
+    }
+
+    public static void lab5() {
+        LeftHandedAutomat a = new LeftHandedAutomat();
+        Grammar g = Grammar.describe()
+                .rule("S -> A | B")
+                .rule("A -> N | b")
+                .rule("B -> Bb | n");
+        a.grammar(g).input("BAb").execute().printTrace();
+
     }
 }

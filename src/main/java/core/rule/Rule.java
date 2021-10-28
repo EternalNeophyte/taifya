@@ -54,6 +54,10 @@ public class Rule implements Formatting, ListSafeAccessor {
         return right;
     }
 
+    public Stream<ChainSequence> rightStream() {
+        return right.stream();
+    }
+
     public ChainSequence right(int index) {
         return getAtIndexOrElse(right, index, ChainSequence.empty());
     }
@@ -96,6 +100,10 @@ public class Rule implements Formatting, ListSafeAccessor {
 
     public boolean isAligned() {
         return isAlignedLeft() || isAlignedRight();
+    }
+
+    public boolean isRecursive() {
+        return rightStream().anyMatch(cs -> cs.startsSameAs(left));
     }
 
     @Override

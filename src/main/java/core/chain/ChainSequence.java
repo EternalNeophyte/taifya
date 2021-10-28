@@ -4,6 +4,7 @@ import util.ListSafeAccessor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -40,10 +41,13 @@ public class ChainSequence implements ListSafeAccessor {
         return chains.size() == size;
     }
 
-    public boolean startsWith(String literal) {
-        return getAtIndexOrElse(chains, 0, Chain.empty())
-                .getLiteral()
-                .equals(literal);
+    public boolean startsSameAs(String input) {
+        String literal = getAtIndexOrElse(chains, 0, Chain.empty()).getLiteral();
+        return input.startsWith(literal);
+    }
+
+    public boolean startsSameAs(ChainSequence other) {
+        return other.at(0).getLiteral().equals(this.at(0).getLiteral());
     }
 
     public boolean containsInOrder(ChainType... types) {
@@ -65,5 +69,12 @@ public class ChainSequence implements ListSafeAccessor {
         return size == other.size()
                 && IntStream.range(0, size)
                             .allMatch(i -> this.at(i).equals(other.at(i)));
+    }
+
+    @Override
+    public String toString() {
+        return chains()
+                .map(Chain::getLiteral)
+                .collect(Collectors.joining());
     }
 }

@@ -2,6 +2,11 @@ package core.automat;
 
 public class Automats {
 
-    //new BasicWithMM()
-    //static newExtendedWithMM()
+    public static LeftHandedAutomat newLeftHanded() {
+        return new LeftHandedAutomat();
+    }
+
+    public static RightHandedExtendedAutomat newRightHandedExtended() {
+        return new RightHandedExtendedAutomat();
+    }
 }
