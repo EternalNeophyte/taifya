@@ -1,6 +1,6 @@
 package core.automat;
 
-import core.chain.ChainSequence;
+import core.chain.Chain;
 import core.format.Regulars;
 import core.grammar.Grammar;
 
@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class AbstractAutomat<T extends AbstractAutomat<T>> implements Regulars {
 
     Grammar grammar;
-    ChainSequence magazine;
+    Chain magazine;
     AtomicInteger counter;
     State state;
     Stack<String> input;
@@ -49,7 +49,7 @@ public abstract class AbstractAutomat<T extends AbstractAutomat<T>> implements R
     }
 
     void track(int number, String next) {
-        track(number, next, magazine.toString());
+        track(number, next, magazine.getLiteral());
     }
 
     public void printTrace() {

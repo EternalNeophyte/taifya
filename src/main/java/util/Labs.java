@@ -48,11 +48,13 @@ public class Labs {
 
     public static void lab5() {
         LeftHandedAutomat a = new LeftHandedAutomat();
-        Grammar g = Grammar.describe()
-                .rule("S -> A | B")
-                .rule("A -> N | b")
-                .rule("B -> Bb | n");
-        a.grammar(g).input("BAb").execute().printTrace();
+        Grammar grammar = Grammar.describe()
+                .rule("S -> AB | ε")
+                .rule("A -> Aa | S | a")
+                .rule("B -> bD | bS | b")
+                .rule("D -> ccD")
+                .rule("E -> eE |e");
+        a.grammar(grammar).input("DccE").execute().printTrace();
 
     }
 }

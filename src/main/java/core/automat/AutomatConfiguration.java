@@ -37,6 +37,6 @@ public class AutomatConfiguration {
 
     @Override
     public String toString() {
-        return String.format("| %5s | %5s | %10s\t%40s", number, recordedState, magazineContent, inputContent);
+        return String.format("| %5s | %5s | %5s | %30s", number, recordedState, magazineContent, inputContent);
     }
 }
