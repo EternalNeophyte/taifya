@@ -1,4 +1,4 @@
-package core.chain;
+package core.structure;
 
 import core.format.Regulars;
 

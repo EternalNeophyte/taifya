@@ -1,4 +1,4 @@
-package core.chain;
+package core.structure;
 
 import util.ListSafeAccessor;
 
@@ -47,7 +47,7 @@ public class ChainSequence implements ListSafeAccessor {
     }
 
     public boolean startsSameAs(ChainSequence other) {
-        return other.at(0).getLiteral().equals(this.at(0).getLiteral());
+        return at(0).literalEquals(other.at(0));
     }
 
     public boolean containsInOrder(ChainType... types) {

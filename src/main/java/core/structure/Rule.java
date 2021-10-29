@@ -1,7 +1,5 @@
-package core.rule;
+package core.structure;
 
-import core.chain.Chain;
-import core.chain.ChainSequence;
 import core.format.Formatting;
 import util.ListSafeAccessor;
 
@@ -11,7 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static core.chain.ChainType.*;
+import static core.structure.ChainType.*;
 
 public class Rule implements Formatting, ListSafeAccessor {
 
@@ -105,8 +103,8 @@ public class Rule implements Formatting, ListSafeAccessor {
         return isAlignedLeft() || isAlignedRight();
     }
 
-    public boolean isRecursive() {
-        return rightSequences().anyMatch(cs -> cs.startsSameAs(left));
+    public boolean isNotRecursive() {
+        return rightSequences().noneMatch(cs -> cs.startsSameAs(left));
     }
 
     @Override

@@ -1,9 +1,8 @@
-package core.chain;
+package core.structure;
 
 import core.format.Regulars;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 public class Chain {
 

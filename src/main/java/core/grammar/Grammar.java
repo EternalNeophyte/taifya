@@ -1,8 +1,9 @@
 package core.grammar;
 
-import core.chain.Chain;
+import core.structure.Chain;
 import core.format.Formatting;
-import core.rule.Rule;
+import core.structure.ChainSequence;
+import core.structure.Rule;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -12,13 +13,13 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static core.chain.ChainType.NON_TERMINAL;
-import static core.chain.ChainType.TERMINAL;
+import static core.structure.ChainType.NON_TERMINAL;
+import static core.structure.ChainType.TERMINAL;
 import static core.grammar.GrammarType.*;
 
 public class Grammar implements Formatting {
 
-    public final static Chain INITIAL_CHAIN = Chain.from("S");
+    public final static ChainSequence INITIAL_CHAIN = ChainSequence.empty().chain("S");
 
     private GrammarType type;
     private List<Rule> rules;
@@ -89,28 +90,32 @@ public class Grammar implements Formatting {
         return rules().allMatch(predicate);
     }
 
-    private List<Rule> findRulesByLiteralsIn(Chain chain, Function<Rule, Stream<Chain>> ruleMapper) {
-        return rules().filter(rule -> ruleMapper.apply(rule)
-                                                .anyMatch(each -> each.literalEquals(chain)))
+    private List<Rule> findRulesByLiteralsIn(ChainSequence chain, Function<Rule, Stream<ChainSequence>> ruleMapper) {
+        return rules().filter(rule -> rule.isNotRecursive() &&
+                                      ruleMapper.apply(rule)
+                                                .anyMatch(each -> each.startsSameAs(chain)))
                       .collect(Collectors.toUnmodifiableList());
     }
 
-    private List<Rule> findRulesWithLeft(Chain chain) {
-        return findRulesByLiteralsIn(chain, Rule::leftChains);
+    private List<Rule> findRulesWithLeft(ChainSequence chain) {
+        return rules().filter(rule -> rule.isNotRecursive() && rule.left().startsSameAs(chain))
+                .collect(Collectors.toUnmodifiableList());
     }
 
     private List<Rule> findRulesWithRight(Chain chain) {
-        return findRulesByLiteralsIn(chain, Rule::rightChains);
+        //return findRulesByLiteralsIn(chain, Rule::rightChains);
+        return null;
     }
 
-    public boolean lookupLeft(String input, Chain sequence, Consumer<Chain> consumer) {
-        if(sequence.equals(INITIAL_CHAIN)) {
-            consumer.accept(sequence);
+    public boolean lookupLeft(String input, ChainSequence chain, Consumer<ChainSequence> consumer) {
+        if(chain.equals(INITIAL_CHAIN)) {
+            consumer.accept(chain);
         }
-        for(Rule rule : findRulesWithLeft(sequence)) {
-            for(Chain ch : rule.rightChains().collect(Collectors.toList())) {
+        for(Rule rule : findRulesWithLeft(chain)) {
+            List<Chain> rightChains = rule.rightChains().collect(Collectors.toList());
+            for(ChainSequence ch : rule.right()) {
                 consumer.accept(ch);
-                if(input.startsWith(ch.getLiteral())) {
+                if(ch.startsSameAs(input)) {
                     return true;
                 }
                 lookupLeft(input, ch, consumer);
