@@ -50,25 +50,28 @@ public class Rule implements Formatting, ListSafeAccessor {
         return left;
     }
 
-    public List<ChainSequence> right() {
-        return right;
+    public Stream<Chain> leftChains() {
+        return left.chains();
     }
 
-    public Stream<ChainSequence> rightStream() {
-        return right.stream();
+    public List<ChainSequence> right() {
+        return right;
     }
 
     public ChainSequence right(int index) {
         return getAtIndexOrElse(right, index, ChainSequence.empty());
     }
 
+    public Stream<ChainSequence> rightSequences() {
+        return right.stream();
+    }
+
     public Stream<Chain> rightChains() {
-        return right.stream()
-                    .flatMap(ChainSequence::chains);
+        return rightSequences().flatMap(ChainSequence::chains);
     }
 
     public Stream<Chain> mergedChains() {
-        return Stream.concat(left.chains(), rightChains());
+        return Stream.concat(leftChains(), rightChains());
     }
 
     public boolean hasEmptyChain() {
@@ -103,7 +106,7 @@ public class Rule implements Formatting, ListSafeAccessor {
     }
 
     public boolean isRecursive() {
-        return rightStream().anyMatch(cs -> cs.startsSameAs(left));
+        return rightSequences().anyMatch(cs -> cs.startsSameAs(left));
     }
 
     @Override

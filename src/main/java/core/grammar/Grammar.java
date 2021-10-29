@@ -1,13 +1,13 @@
 package core.grammar;
 
 import core.chain.Chain;
-import core.chain.ChainSequence;
 import core.format.Formatting;
 import core.rule.Rule;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -77,14 +77,6 @@ public class Grammar implements Formatting {
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    public int numberOfRules() {
-        return rules.size();
-    }
-
-    public Rule lastRule() {
-        return rules.get(rules.size() - 1);
-    }
-
     public Stream<Rule> rules() {
         return rules.stream();
     }
@@ -97,19 +89,18 @@ public class Grammar implements Formatting {
         return rules().allMatch(predicate);
     }
 
-    private List<Rule> findRulesBy(Predicate<Rule> predicate) {
-        return rules()
-                .filter(predicate)
-                .collect(Collectors.toUnmodifiableList());
+    private List<Rule> findRulesByLiteralsIn(Chain chain, Function<Rule, Stream<Chain>> ruleMapper) {
+        return rules().filter(rule -> ruleMapper.apply(rule)
+                                                .anyMatch(each -> each.literalEquals(chain)))
+                      .collect(Collectors.toUnmodifiableList());
     }
 
-    private List<Rule> findRulesWithLeft(Chain sequence) {
-        return findRulesBy(rule -> rule.left().chains().anyMatch(cs -> cs.getLiteral().startsWith(sequence.getLiteral())));
+    private List<Rule> findRulesWithLeft(Chain chain) {
+        return findRulesByLiteralsIn(chain, Rule::leftChains);
     }
 
-    private List<Rule> findRulesWithRight(Chain sequence) {
-        return findRulesBy(rule -> rule.rightChains()
-                                       .anyMatch(cs -> cs.getLiteral().startsWith(sequence.getLiteral())));
+    private List<Rule> findRulesWithRight(Chain chain) {
+        return findRulesByLiteralsIn(chain, Rule::rightChains);
     }
 
     public boolean lookupLeft(String input, Chain sequence, Consumer<Chain> consumer) {
@@ -117,23 +108,13 @@ public class Grammar implements Formatting {
             consumer.accept(sequence);
         }
         for(Rule rule : findRulesWithLeft(sequence)) {
-            if(rule.isRecursive()) {
-                break;
-            }
-
-
             for(Chain ch : rule.rightChains().collect(Collectors.toList())) {
                 consumer.accept(ch);
                 if(input.startsWith(ch.getLiteral())) {
-
                     return true;
-
                 }
-
                 lookupLeft(input, ch, consumer);
             }
-
-
         }
         return false;
     }

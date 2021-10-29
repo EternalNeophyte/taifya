@@ -19,7 +19,7 @@ public abstract class AbstractAutomat<T extends AbstractAutomat<T>> implements R
     Stack<String> input;
     List<AutomatConfiguration> trace;
 
-    public AbstractAutomat() {
+    AbstractAutomat() {
         counter = new AtomicInteger(0);
         state = State.INITIAL;
         input = new Stack<>();

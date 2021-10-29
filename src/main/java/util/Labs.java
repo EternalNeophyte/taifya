@@ -1,15 +1,11 @@
 package util;
 
-import core.automat.LeftHandedAutomat;
-import core.automat.State;
+import core.automat.Automats;
+import core.automat.LeftLookingAutomat;
 import core.grammar.Grammar;
-import core.rule.Rule;
 
-import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class Labs {
 
@@ -47,14 +43,15 @@ public class Labs {
     }
 
     public static void lab5() {
-        LeftHandedAutomat a = new LeftHandedAutomat();
-        Grammar grammar = Grammar.describe()
-                .rule("S -> AB | ε")
-                .rule("A -> Aa | S | a")
-                .rule("B -> bD | bS | b")
-                .rule("D -> ccD")
-                .rule("E -> eE |e");
-        a.grammar(grammar).input("DccE").execute().printTrace();
-
+        Automats.newLeftLooking()
+                .grammar(Grammar.describe()
+                                .rule("S -> AB | ε")
+                                .rule("A -> Aa | S | a")
+                                .rule("B -> bD | bS | b")
+                                .rule("D -> ccD")
+                                .rule("E -> eE |e"))
+                .input("DcE")
+                .execute()
+                .printTrace();
     }
 }

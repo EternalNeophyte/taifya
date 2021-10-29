@@ -2,11 +2,11 @@ package core.automat;
 
 public class Automats {
 
-    public static LeftHandedAutomat newLeftHanded() {
-        return new LeftHandedAutomat();
+    public static LeftLookingAutomat newLeftLooking() {
+        return new LeftLookingAutomat();
     }
 
-    public static RightHandedExtendedAutomat newRightHandedExtended() {
-        return new RightHandedExtendedAutomat();
+    public static ExtendedRightLookingAutomat newExtendedRightLooking() {
+        return new ExtendedRightLookingAutomat();
     }
 }

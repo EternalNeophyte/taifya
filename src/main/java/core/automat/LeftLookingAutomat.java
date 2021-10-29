@@ -4,14 +4,14 @@ import core.grammar.Grammar;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class LeftHandedAutomat extends AbstractAutomat<LeftHandedAutomat> {
+public class LeftLookingAutomat extends AbstractAutomat<LeftLookingAutomat> {
 
-    public LeftHandedAutomat() {
+    LeftLookingAutomat() {
         super();
     }
 
     @Override
-    public LeftHandedAutomat execute() {
+    public LeftLookingAutomat execute() {
         boolean matchFound;
         AtomicReference<String> next = new AtomicReference<>(/*input.peek()*/);
         while(!input.empty()) {

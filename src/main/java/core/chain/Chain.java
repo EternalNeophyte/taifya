@@ -23,6 +23,14 @@ public class Chain {
         return new Chain(input);
     }
 
+    public ChainType getType() {
+        return type;
+    }
+
+    public String getLiteral() {
+        return literal;
+    }
+
     public static boolean is(String input, ChainType type) {
         return ChainType.from(input).equals(type);
     }
@@ -44,12 +52,8 @@ public class Chain {
         return !isAnyOf(types);
     }
 
-    public ChainType getType() {
-        return type;
-    }
-
-    public String getLiteral() {
-        return literal;
+    public boolean literalEquals(Chain other) {
+        return literal.equals(other.literal);
     }
 
     @Override
@@ -62,8 +66,7 @@ public class Chain {
         }
         else {
             Chain ch = (Chain) o;
-            return Objects.equals(this.literal, ch.literal)
-                    && this.type.sameAs(ch.type);
+            return literalEquals(ch) && this.type.sameAs(ch.type);
         }
     }
 
