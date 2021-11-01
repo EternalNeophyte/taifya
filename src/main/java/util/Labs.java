@@ -50,7 +50,7 @@ public class Labs {
                                 .rule("B -> bD | bS | b")
                                 .rule("D -> ccD")
                                 .rule("E -> eE |e"))
-                .input("DcA")
+                .input("bcDAE")
                 .execute()
                 .printTrace();
     }

@@ -1,5 +1,6 @@
 package core.structure;
 
+import core.grammar.Grammar;
 import util.ListSafeAccessor;
 
 import java.util.ArrayList;
@@ -7,6 +8,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static core.structure.ChainType.NON_TERMINAL;
+import static core.structure.ChainType.TERMINAL;
 
 public class ChainSequence implements ListSafeAccessor {
 
@@ -25,8 +29,31 @@ public class ChainSequence implements ListSafeAccessor {
         return this;
     }
 
+    public List<Chain> getChains() {
+        return chains;
+    }
+
     public Stream<Chain> chains() {
         return chains.stream();
+    }
+
+    private Stream<Chain> chainsOfType(ChainType type) {
+        return chains.stream().filter(ch -> ch.is(type));
+    }
+
+    public Stream<Chain> terminals() {
+        return chainsOfType(TERMINAL);
+    }
+
+    public Stream<Chain> nonterminals() {
+        return chainsOfType(NON_TERMINAL);
+    }
+
+    public void removeFirstOrElse(Chain other) {
+        if(hasSize(0)) {
+            chains.add(other);
+        }
+        chains.remove(0);
     }
 
     public Chain at(int index) {
@@ -42,12 +69,16 @@ public class ChainSequence implements ListSafeAccessor {
     }
 
     public boolean startsSameAs(String input) {
-        String literal = getAtIndexOrElse(chains, 0, Chain.empty()).getLiteral();
+        String literal = at(0).getLiteral();
         return input.startsWith(literal);
     }
 
     public boolean startsSameAs(ChainSequence other) {
-        return at(0).literalEquals(other.at(0));
+        return other.at(0).literalEquals(at(0));
+    }
+
+    public boolean containsSameAs(ChainSequence other) {
+        return chains().anyMatch(ch -> other.chains().anyMatch(ch::literalEquals));
     }
 
     public boolean containsInOrder(ChainType... types) {

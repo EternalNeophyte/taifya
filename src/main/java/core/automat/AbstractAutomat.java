@@ -1,6 +1,5 @@
 package core.automat;
 
-import core.structure.Chain;
 import core.format.Regulars;
 import core.grammar.Grammar;
 import core.structure.ChainSequence;

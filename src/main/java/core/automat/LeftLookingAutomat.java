@@ -1,8 +1,9 @@
 package core.automat;
 
 import core.grammar.Grammar;
+import core.structure.Chain;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.LinkedList;
 
 public class LeftLookingAutomat extends AbstractAutomat<LeftLookingAutomat> {
 
@@ -10,28 +11,31 @@ public class LeftLookingAutomat extends AbstractAutomat<LeftLookingAutomat> {
         super();
     }
 
+
+
     @Override
     public LeftLookingAutomat execute() {
         boolean matchFound;
-        AtomicReference<String> next = new AtomicReference<>(/*input.peek()*/);
+        String copyOfNext;
+        magazine = Grammar.INITIAL_SEQUENCE;
         while(!input.empty()) {
-            next.set(input.pop());
-            matchFound = grammar.lookupLeft(next.get(),
-                                            Grammar.INITIAL_CHAIN,
+            String next = input.pop();
+            copyOfNext = next;
+            matchFound = grammar.lookupLeft(next, new LinkedList<>(),
+                                         magazine,
                                             cs -> {
                                                 magazine = cs;
-                                                track(counter.incrementAndGet(), next.get());
+                                                track(counter.incrementAndGet(), next);
+
                                             });
-            //ToDo нетерминалы проскакивают через соответствие - фикс
-            //ToDo Некорректный возврат boolean из lookupLeft - фикс
-            //ToDo Бесконечная рекурсия без isNotRecursive, а с этим методом проходит только 1 правило
-            /*if(!matchFound) {
+            magazine.removeFirstOrElse(Chain.empty());
+            if(!matchFound) {
                 printTrace();
                 throw new InputAbortedException("Автомат не нашел соответствий для '" +
-                        next.get() +
+                        copyOfNext +
                         "' и преждевременно завершил работу");
 
-            }*/
+            }
         }
         track(counter.incrementAndGet(), EPSILON, EPSILON);
         return this;

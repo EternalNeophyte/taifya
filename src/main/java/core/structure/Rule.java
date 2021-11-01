@@ -104,7 +104,12 @@ public class Rule implements Formatting, ListSafeAccessor {
     }
 
     public boolean isNotRecursive() {
-        return rightSequences().noneMatch(cs -> cs.startsSameAs(left));
+        return rightChains().noneMatch(right -> leftChains().anyMatch(right::literalEquals));
+    }
+
+    public boolean isNotCycledOn(Rule other) {
+        return other.rightSequences().noneMatch(cs -> cs.startsSameAs(left)) ||
+                rightSequences().noneMatch(cs -> cs.startsSameAs(other.left));
     }
 
     @Override

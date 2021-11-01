@@ -11,10 +11,10 @@ import java.util.stream.Stream;
 
 public enum ChainType implements Regulars {
 
-    AXIOM(S, "Аксиома грамматики"),
+    AXIOM(S_EXP, "Аксиома грамматики"),
     TERMINAL(LOWERCASE_AND_DIGITS, "Терминал"),
     NON_TERMINAL(UPPERCASE_WITHOUT_S, "Нетерминал"),
-    EMPTY(EPSILONS, "Пустая цепочка"),
+    EMPTY(EPSILON_EXP, "Пустая цепочка"),
     UNKNOWN(NO_SPACE, "Неопознанный элемент");
 
     private final String regex;

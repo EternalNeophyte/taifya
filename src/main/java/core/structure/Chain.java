@@ -4,7 +4,7 @@ import core.format.Regulars;
 
 import java.util.Arrays;
 
-public class Chain {
+public class Chain implements Regulars {
 
     private final ChainType type;
     private final String literal;
@@ -15,7 +15,11 @@ public class Chain {
     }
 
     public static Chain empty() {
-        return new Chain(Regulars.EPSILON);
+        return new Chain(EPSILON);
+    }
+
+    public static Chain axiom() {
+        return new Chain(S);
     }
 
     public static Chain from(String input) {
