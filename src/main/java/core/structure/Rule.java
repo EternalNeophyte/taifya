@@ -107,11 +107,6 @@ public class Rule implements Formatting, ListSafeAccessor {
         return rightChains().noneMatch(right -> leftChains().anyMatch(right::literalEquals));
     }
 
-    public boolean isNotCycledOn(Rule other) {
-        return other.rightSequences().noneMatch(cs -> cs.startsSameAs(left)) ||
-                rightSequences().noneMatch(cs -> cs.startsSameAs(other.left));
-    }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("\n\tПравило {")

@@ -19,24 +19,8 @@ public class AutomatConfiguration {
         this.recordedState = recordedState;
     }
 
-    public int getNumber() {
-        return number;
-    }
-
-    public String getRecordedState() {
-        return recordedState;
-    }
-
-    public String getInputContent() {
-        return inputContent;
-    }
-
-    public String getMagazineContent() {
-        return magazineContent;
-    }
-
     @Override
     public String toString() {
-        return String.format("| %5s | %5s | %5s | %30s", number, recordedState, magazineContent, inputContent);
+        return String.format("| %5s | %5s | %5s | %30s |", number, recordedState, magazineContent, inputContent);
     }
 }

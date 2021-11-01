@@ -1,7 +1,6 @@
 package util;
 
 import core.automat.Automats;
-import core.automat.LeftLookingAutomat;
 import core.grammar.Grammar;
 
 import java.util.Scanner;
@@ -43,14 +42,27 @@ public class Labs {
     }
 
     public static void lab5() {
+        System.out.println("Введите строку для распознавания МП-автоматами");
+        //Например, bccE
+        Scanner scanner = new Scanner(System.in);
+        String line = scanner.nextLine();
+        scanner.close();
+        Grammar grammar = Grammar.describe()
+                .rule("S -> AB")  //| ε
+                .rule("A -> Aa | S | a")
+                .rule("B -> bD | bS | b")
+                .rule("D -> ccD")
+                .rule("E -> eE |e");
         Automats.newLeftLooking()
-                .grammar(Grammar.describe()
-                                .rule("S -> AB | ε")
-                                .rule("A -> Aa | S | a")
-                                .rule("B -> bD | bS | b")
-                                .rule("D -> ccD")
-                                .rule("E -> eE |e"))
-                .input("bcDAE")
+                .grammar(grammar)
+                .input(line)
+                //.abortIfInputIsIncorrect()
+                .execute()
+                .printTrace();
+        Automats.newExtendedRightLooking()
+                .grammar(grammar)
+                .marquer("#")
+                .input(line)
                 .execute()
                 .printTrace();
     }

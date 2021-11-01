@@ -5,6 +5,7 @@ import core.format.Formatting;
 import core.structure.ChainSequence;
 import core.structure.Rule;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -41,6 +42,10 @@ public class Grammar implements Formatting {
         return this;
     }
 
+    public List<Rule> getRules() {
+        return rules;
+    }
+
     public Grammar formulate() {
         classify();
         terminals = literalsSelectedBy(c -> c.is(TERMINAL));
@@ -48,8 +53,9 @@ public class Grammar implements Formatting {
         return this;
     }
 
-    public List<Rule> getRules() {
-        return rules;
+    public boolean classifiedAs(GrammarType... types) {
+        classify();
+        return Arrays.stream(types).anyMatch(t -> t.equals(type));
     }
 
     public void classify() {
@@ -75,11 +81,11 @@ public class Grammar implements Formatting {
 
     private List<String> literalsSelectedBy(Predicate<Chain> predicate) {
         return rules.stream()
-                .flatMap(Rule::mergedChains)
-                .filter(predicate)
-                .map(Chain::getLiteral)
-                .distinct()
-                .collect(Collectors.toUnmodifiableList());
+                    .flatMap(Rule::mergedChains)
+                    .filter(predicate)
+                    .map(Chain::getLiteral)
+                    .distinct()
+                    .collect(Collectors.toUnmodifiableList());
     }
 
     public Stream<Rule> rules() {
@@ -95,63 +101,49 @@ public class Grammar implements Formatting {
     }
 
     private List<Rule> findRulesByLiteralsIn(ChainSequence chain, Function<Rule, Stream<ChainSequence>> ruleMapper) {
-        return rules()
-                    .filter(rule -> /*rule.isNotRecursive() &&*/
-                                    ruleMapper.apply(rule)
-                                            .anyMatch(each -> each.containsSameAs(chain)))
-                    .collect(Collectors.toUnmodifiableList());
+        return rules().filter(rule -> ruleMapper.apply(rule)
+                                                .anyMatch(each -> each.containsSameAs(chain)))
+                      .collect(Collectors.toUnmodifiableList());
     }
 
     private List<Rule> findRulesWithLeft(ChainSequence chain) {
         return findRulesByLiteralsIn(chain, rule -> Stream.of(rule.left()));
     }
 
-    private List<Rule> findRulesWithRight(Chain chain) {
-        //return findRulesByLiteralsIn(chain, Rule::rightChains);
-        return null;
+    private List<Rule> findRulesWithRight(ChainSequence chain) {
+        return findRulesByLiteralsIn(chain, Rule::rightSequences);
     }
 
-    public boolean lookupLeft(String input, List<Rule> checked, ChainSequence chain, Consumer<ChainSequence> consumer) {
-        if(chain.equals(INITIAL_SEQUENCE)) {
-            consumer.accept(chain);
-        }
-        List<Rule> leftRules = findRulesWithLeft(chain);
-        for(Rule rule : leftRules) {
-
-            List<ChainSequence> rightSequences = rule.right();
-            for(ChainSequence sequence : rightSequences) {
-
-                    consumer.accept(sequence);
-                    if(sequence.startsSameAs(input)) {
-                       return true;
-                    }
-
-                    if(rule.isNotRecursive() && !checked.contains(rule)) {
-                        checked.add(rule);
-                        return lookupLeft(input, checked, sequence, consumer);
-                    }
-
+    public boolean lookupLeft(String input, List<Rule> checked, ChainSequence sequence, Consumer<ChainSequence> consumer) {
+        for(Rule rule : findRulesWithLeft(sequence)) {
+            for(ChainSequence rightSequence : rule.right()) {
+                consumer.accept(rightSequence);
+                if(rightSequence.startsSameAs(input)) {
+                    return true;
+                }
+                if(rule.isNotRecursive() && !checked.contains(rule)) {
+                    checked.add(rule);
+                    return lookupLeft(input, checked, rightSequence, consumer);
+                }
             }
-
-
-
         }
         return false;
     }
 
-    public void lookupRight(String input, List<Rule> rules, Consumer<Chain> consumer) {
-        /*for(Rule rule : rules) {
-            rule.rightaChins()
-                .filter(cs -> cs.startsSameAs(input))
-                .findFirst()
-                .ifPresent(consumer);
-            Chain left = rule.left();
-            consumer.accept(left);
-            if(left.equals(INITIAL_CHAIN)) {
-                break;
+    public boolean lookupRight(String input, List<Rule> checked, ChainSequence sequence, Consumer<ChainSequence> consumer) {
+        consumer.accept(sequence);
+        for(Rule rule : findRulesWithRight(sequence)) {
+            ChainSequence leftSequence = rule.left();
+                if(leftSequence.equals(INITIAL_SEQUENCE)) {
+                    consumer.accept(leftSequence);
+                    return true;
+                }
+                if(rule.isNotRecursive() && !checked.contains(rule)) {
+                    checked.add(rule);
+                    return lookupRight(input, checked, leftSequence, consumer);
             }
-            lookupRight(input, findRulesWithRight(left), consumer);
-        }*/
+        }
+        return false;
     }
 
     public void print() {

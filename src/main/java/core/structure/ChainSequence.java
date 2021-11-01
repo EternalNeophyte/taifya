@@ -1,6 +1,5 @@
 package core.structure;
 
-import core.grammar.Grammar;
 import util.ListSafeAccessor;
 
 import java.util.ArrayList;
@@ -29,6 +28,15 @@ public class ChainSequence implements ListSafeAccessor {
         return this;
     }
 
+    public ChainSequence chaining(List<Chain> chain) {
+        chains.addAll(chain);
+        return this;
+    }
+
+    public static ChainSequence of(List<Chain> chain) {
+        return empty().chaining(chain);
+    }
+
     public List<Chain> getChains() {
         return chains;
     }
@@ -47,6 +55,12 @@ public class ChainSequence implements ListSafeAccessor {
 
     public Stream<Chain> nonterminals() {
         return chainsOfType(NON_TERMINAL);
+    }
+
+    public void removeFirst() {
+        if(size() > 0) {
+            chains.remove(0);
+        }
     }
 
     public void removeFirstOrElse(Chain other) {

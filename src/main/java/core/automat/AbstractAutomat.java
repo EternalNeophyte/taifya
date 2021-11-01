@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static core.grammar.GrammarType.*;
+
 public abstract class AbstractAutomat<T extends AbstractAutomat<T>> implements Regulars {
 
     Grammar grammar;
@@ -18,16 +20,21 @@ public abstract class AbstractAutomat<T extends AbstractAutomat<T>> implements R
     State state;
     Stack<String> input;
     List<AutomatConfiguration> trace;
+    boolean abortIncorrectInput;
 
     AbstractAutomat() {
         counter = new AtomicInteger(0);
         state = State.INITIAL;
         input = new Stack<>();
         trace = new LinkedList<>();
+        abortIncorrectInput = false;
     }
 
     public T grammar(Grammar grammar) {
         this.grammar = grammar;
+        if(grammar.classifiedAs(TYPE_0, CONTEXT_DEPENDANT)) {
+            throw new InvalidGrammarException("Автомат не принимает грамматику с типом ниже КС (тип 2)");
+        }
         return (T) this;
     }
 
@@ -37,6 +44,11 @@ public abstract class AbstractAutomat<T extends AbstractAutomat<T>> implements R
                                 .toString()
                                 .split("");
         Arrays.stream(symbols).forEach(input::push);
+        return (T) this;
+    }
+
+    public T abortIfInputIsIncorrect() {
+        abortIncorrectInput = true;
         return (T) this;
     }
 
@@ -53,11 +65,9 @@ public abstract class AbstractAutomat<T extends AbstractAutomat<T>> implements R
     }
 
     public void printTrace() {
-        System.out.println("Список конфигураций автомата");
+        System.out.printf("[ %5s ][ %4s ][ %4s ][ %29s ]%n", "№", "Сост", "М", "Входная строка");
         trace.forEach(System.out::println);
     }
 
     public abstract T execute();
-
-    public abstract void terminate(State state);
 }
